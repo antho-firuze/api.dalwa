@@ -1,0 +1,10 @@
+{
+    "require": {
+				"mpdf/mpdf": "7.1.5",
+        "swiftmailer/swiftmailer": "6.0",
+        "peppeocchi/php-cron-scheduler": "^2.3",
+        "monolog/monolog": "^1.23",
+        "athari/yalinqo": " ^2.0",
+        "rmccue/requests": "^1.7"
+    }
+}
