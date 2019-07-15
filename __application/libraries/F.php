@@ -193,38 +193,43 @@ class F {
 
 	function is_valid_appcode($request)
 	{
-		$ci = $this->ci;
+		if (!isset($request->appcode) || empty($request->appcode)) 
+			return [FALSE, ['message' => F::_err_msg('err_appcode_invalid')]];
+
+		$ci =& get_instance();
 		$ci->db->select('*');
 		$ci->db->from('a_application');
 		$ci->db->where('code', $request->appcode);
 		$row = $ci->db->get()->row();
-		if (!$row) {
-			return [FALSE, ['message' => err_msg('err_appcode_invalid')]];
-		}
-		$request->application_id = $row->id;
+		if (!$row) 
+			return [FALSE, ['message' => F::_err_msg('err_appcode_invalid')]];
 
+		$request->application_id = $row->application_id;
 		return [TRUE, NULL];
 	}
 
 	function is_valid_token($request)
 	{
-		$ci = $this->ci;
-		$ci->db->select('a.application_id, a.token_expired, b.code as application_code, c.partner_id, c.username');
+		if (!isset($request->token) || empty($request->token)) 
+			return [FALSE, ['message' => F::_err_msg('err_token_invalid')]];
+
+		$ci =& get_instance();
+		$ci->db->select('a.application_id, a.agent, a.token_expired, b.partner_id, b.username, b.password, c.code as application_code');
 		$ci->db->from('a_session a');
-		$ci->db->join('a_application b', 'a.application_id = b.application_id');  
-		$ci->db->join('a_login c', 'a.login_id = c.login_id');  
-		$ci->db->where('a.token', $request->token_id);
+		$ci->db->join('a_login b', 'b.login_id = a.login_id');  
+		$ci->db->join('a_application c', 'c.application_id = a.application_id');  
+		$ci->db->where('a.token', $request->token);
 		$ci->db->where('a.agent', $request->agent);
 		$row = $ci->db->get()->row();
-		if (!$row) {
-			return [FALSE, ['message' => err_msg('err_token_invalid')]];
-		}
-		$request->user_id = 0;
+		if (!$row) 
+			return [FALSE, ['message' => F::_err_msg('err_token_invalid')]];
+		
+		if ($row->token_expired < date('Y-m-d H:i:s'))
+			return [FALSE, ['message' => F::_err_msg('err_token_invalid')]];
+		
 		$request->application_id = $row->application_id;
-		$request->appcode = $row->AppsCode;
-
-		list($success, $return) = $this->is_valid_credit($request);
-		if (!$success) return [FALSE, $return];		
+		$request->application_code = $row->application_code;
+		$request->partner_id = $row->partner_id;
 
 		return [TRUE, NULL];
 	}
@@ -258,6 +263,17 @@ class F {
 		$ci->db->insert('simpi_log_api_tmp', $data);
 	}
 	
+	function check_field_required($request, $fields = array())
+	{
+		foreach($fields as $k => $v)
+		{
+			if (!isset($request->params->{$v}) || empty($request->params->{$v}))
+				return [FALSE, ['message' => F::_err_msg('err_param_required', $v)]];
+		}
+
+		return [TRUE, NULL];
+	}
+
 	/*
 	 * Create avatar from word, like on google mail apps
 	 * 

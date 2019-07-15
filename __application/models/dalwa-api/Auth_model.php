@@ -1,7 +1,5 @@
 <?php if (!defined('BASEPATH')) {exit('No direct script access allowed');}
 
-// This authentication is for students
-
 class Auth_model extends CI_Model
 {
 	private $table_user = 'a_login';						 
@@ -9,31 +7,53 @@ class Auth_model extends CI_Model
 	public $login_token_expiration = 60*60*24; // second*minute*hour
 
 	private $min_password_length = 5;
+	private $max_password_length = 0;
 	private $max_login_attempts = 3;
 	private $lockout_time = 600;
 	
-	function __construct(){
+	function __construct()
+	{
 		parent::__construct();
 		$this->load->database(DATABASE_SYSTEM);
-		$this->load->library('System');
+	}
+	
+	/**
+	 * Method for checking password validation
+	 *
+	 * @param string $password
+	 * @return bool
+	 */
+	private function is_valid_password($password)
+	{
+		if (!isset($password) || empty($password))
+			return [FALSE, $this->f->_err_msg('err_param_required', 'password')];
+		
+		if (strlen($password) < $this->min_password_length)
+			return [FALSE, $this->f->_err_msg('err_min_password_length', $this->min_password_length)];
+		
+		if ($this->max_password_length > 0) 
+		{
+			if (strlen($password) > $this->max_password_length)
+			return [FALSE, $this->f->_err_msg('err_max_password_length', $this->max_password_length)];
+		}
+		
+		$password = md5($password);
+		return [TRUE, $password];
 	}
 	
 	private function is_correct_password($password1, $password2)
 	{
 		return md5($password1) == $password2;
-		}
+	}
 	
 	function login($request)
 	{
-		list($success, $return) = $this->system->is_valid_appcode($request);
+		list($success, $return) = $this->f->is_valid_appcode($request);
 		if (!$success) return [FALSE, $return];
-		
-		if (!isset($request->params->username) || empty($request->params->username))
-			return [FALSE, ['message' => $this->f->_err_msg('err_param_required', 'username')]];
-		
-		if (!isset($request->params->password) || empty($request->params->password))
-			return [FALSE, ['message' => $this->f->_err_msg('err_param_required', 'password')]];
-		
+
+		list($success, $return) = $this->f->check_field_required($request, ['username','password']);
+		if (!$success) return [FALSE, $return];
+
 		$row = $this->db->get_where($this->table_user, ['username' => $request->params->username])->row();
 		if (!$row)
 			return [FALSE, ['message' => $this->f->_err_msg('err_username_or_email_not_found')]];
@@ -60,19 +80,19 @@ class Auth_model extends CI_Model
 		$token_expired = date('Y-m-d\TH:i:s\Z', time() + $this->login_token_expiration);
 		// Invalidate old session
 		$this->db->delete($this->table_session, [
-				'login_id' => $row->id, 'application_id' => $request->application_id, 'agent' => $request->agent, 'token <>' => $token
+				'login_id' => $row->login_id, 'application_id' => $request->application_id, 'agent' => $request->agent, 'token <>' => $token
 			]
 		);
 		
 		$this->db->insert($this->table_session, [
-				'login_id' => $row->id, 'application_id' => $request->application_id, 'agent' => $request->agent, 
+				'login_id' => $row->login_id, 'application_id' => $request->application_id, 'agent' => $request->agent, 
 				'token' => $token, 'token_expired' => $token_expired, 'created_at' => date('Y-m-d H:i:s')
 			]
 		);
 		
 		$this->db->update($this->table_user, 
 			['login_last' => date('Y-m-d H:i:s'), 'login_try' => 0], 
-			['username' => $request->username] 
+			['username' => $request->params->username] 
 		);
 		
 		$result = (object)[];
@@ -97,13 +117,10 @@ class Auth_model extends CI_Model
 		list($success, $return) = $this->f->is_valid_token($request);
 		if (!$success) return [FALSE, $return];
 		
-		if (!isset($request->params->password))
-			return [FALSE, ['message' => $this->f->_err_msg('err_param_required', 'password')]];
-
-		if (!isset($request->params->new_password))
-			return [FALSE, ['message' => $this->f->_err_msg('err_param_required', 'new_password')]];
-
-		$row = $this->db->get_where($this->table_user, ['simpiID' => $request->simpi_id, 'emailID' => $request->emailID])->row();
+		list($success, $return) = $this->f->check_field_required($request, ['username', 'password', 'new_password']);
+		if (!$success) return [FALSE, $return];
+		
+		$row = $this->db->get_where($this->table_user, ['username' => $request->params->username])->row();
 		if ((integer)$row->login_try >= $this->max_login_attempts){
 			$this->load->helper('mydate');
 			return [FALSE, ['message' => $this->f->_err_msg('err_login_attempt_reached', nicetime_lang($row->account_locked_until, $request->idiom))]];
@@ -118,7 +135,7 @@ class Auth_model extends CI_Model
 			$update_field['login_try'] = $login_try;
 			$this->db->update($this->table_user, 
 				$update_field, 
-				['simpiID' => $request->simpi_id, 'emailID' => $row->emailID]
+				['username' => $request->params->username]
 			);
 			
 			return [FALSE, ['message' => $this->f->_err_msg('err_old_password')]];
@@ -130,11 +147,10 @@ class Auth_model extends CI_Model
 		$new_password_enc = $result;
 		$this->db->update($this->table_user, 
 			['login_try' => 0, 'password' => $new_password_enc], 
-			['simpiID' => $request->simpi_id, 'emailID' => $row->emailID]
-		);
+			['username' => $request->params->username]);
 		
-		list($success, $message) = $this->send_confirm_mail_chg_password($request);
-		if (!$success) return [FALSE, $message];
+		// list($success, $message) = $this->send_confirm_mail_chg_password($request);
+		// if (!$success) return [FALSE, $message];
 
 		return [TRUE, ['message' => $this->f->lang('success_chg_password')]];
 	}
@@ -144,51 +160,55 @@ class Auth_model extends CI_Model
 		list($success, $return) = $this->f->is_valid_appcode($request);
 		if (!$success) return [FALSE, $return];
 		
-		if (!isset($request->params->email))
-			return [FALSE, ['message' => $this->f->_err_msg('err_param_required', 'email')]];
-
-		$row = $this->db->get_where($this->table_user, ['simpiID' => $request->simpi_id, 'email' => $request->params->email])->row();
-		if (!$row)
-			return [FALSE, ['message' => $this->f->_err_msg('err_username_or_email_not_found')]];
+		list($success, $return) = $this->f->check_field_required($request, ['email']);
+		if (!$success) return [FALSE, $return];
 		
+		$row = $this->db->get_where('c_partner', ['email' => $request->params->email])->row();
+		if (!$row)
+			return [FALSE, ['message' => $this->f->_err_msg('err_email_not_found')]];
+		
+		$row2 = $this->db->get_where($this->table_user, ['partner_id' => $row->partner_id])->row();
+		if (!$row2)
+			return [FALSE, ['message' => $this->f->_err_msg('err_not_registered_user')]];
+
 		// generate random password
 		$new_password = $this->f->gen_pwd($this->min_password_length);
 		$new_password_enc = md5($new_password);
 		$this->db->update($this->table_user, 
 			['password' => $new_password_enc], 
-			['simpiID' => $request->simpi_id, 'emailID' => $row->emailID]
+			['partner_id' => $row->partner_id]
 		);
 		
-		list($success, $message) = $this->send_confirm_mail_forgot_password($request);
-		if (!$success) return [FALSE, $message];
+		// list($success, $message) = $this->send_confirm_mail_forgot_password($request);
+		// if (!$success) return [FALSE, $message];
 
-		return [TRUE, ['message' => $this->f->lang('info_sent_email_password')]];
+		return [TRUE, ['message' => $this->f->lang('info_sent_email_password'), 'pwd' => $new_password]];
 	}
 	
 	function password_reset($request)
 	{
-		list($success, $return) = $this->f->is_valid_license($request);
+		list($success, $return) = $this->f->is_valid_token($request);
 		if (!$success) return [FALSE, $return];
 		
-		if (!isset($request->params->emailID))
-			return [FALSE, ['message' => $this->f->_err_msg('err_param_required', 'emailID')]];
-
-		$row = $this->db->get_where($this->table_user, ['simpiID' => $request->simpi_id, 'emailID' => $request->params->emailID])->row();
+		list($success, $return) = $this->f->check_field_required($request, ['login_id']);
+		if (!$success) return [FALSE, $return];
+		
+		$row = $this->db->get_where($this->table_user, ['login_id' => $request->params->login_id])->row();
 		if (!$row)
-			return [FALSE, ['message' => $this->f->_err_msg('err_username_or_email_not_found')]];
+			return [FALSE, ['message' => $this->f->_err_msg('err_username_not_found')]];
 		
 		// generate random password
 		$new_password = $this->f->gen_pwd($this->min_password_length);
 		$new_password_enc = md5($new_password);
 		$this->db->update($this->table_user, 
 			['password' => $new_password_enc], 
-			['simpiID' => $request->simpi_id, 'emailID' => $row->emailID]
+			['login_id' => $request->params->login_id]
 		);
 		
-		list($success, $message) = $this->send_confirm_mail_reset_password($request);
-		if (!$success) return [FALSE, $message];
+		// list($success, $message) = $this->send_confirm_mail_reset_password($request);
+		// if (!$success) return [FALSE, $message];
 
-		return [TRUE, ['message' => $this->f->lang('info_sent_email_rst_password')]];
+		return [TRUE, ['message' => $this->f->lang('info_sent_email_rst_password'), 'pwd' => $new_password]];
 	}
 
 	private function send_confirm_mail_chg_password($request)
@@ -252,53 +272,6 @@ class Auth_model extends CI_Model
 		if (!$success) return [FALSE, $message];
 
 		return [TRUE, NULL];
-	}
-
-	function token_inject($request)
-	{
-		list($success, $return) = $this->f->is_valid_license($request);
-		if (!$success) return [FALSE, $return];
-		
-		if (!isset($request->params->emailID) || empty($request->params->emailID))
-			return [FALSE, ['message' => $this->f->_err_msg('err_param_required', 'emailID')]];
-		else {
-			$this->load->library('simpi');
-			list($success, $return) = $this->simpi->check_is_mobc_login_valid($request);
-			if (!$success) return [FALSE, $return];
-		}
-
-		if (!isset($request->params->token) || empty($request->params->token))
-			return [FALSE, ['message' => $this->f->_err_msg('err_param_required', 'token')]];
-
-		if (!isset($request->params->token_expired) || empty($request->params->token_expired))
-			return [FALSE, ['message' => $this->f->_err_msg('err_param_required', 'token_expired')]];
-
-		$this->db->delete('mobc_session', [
-				'simpiID' => $request->simpi_id, 'emailID' => $request->params->emailID, 'AppsID' => $request->AppsID, 'agent' => $request->agent, 
-			]
-		);
-		$this->db->insert('mobc_session', [
-				'simpiID' => $request->simpi_id, 'emailID' => $request->params->emailID, 'AppsID' => $request->AppsID, 'agent' => $request->agent, 
-				'token' => $request->params->token, 'token_expired' => $request->params->token_expired, 'LogTime' => date('Y-m-d H:i:s')
-			]
-		);
-
-		$request->method = 'olap.token_inject';
-		$response = Requests::post(API_OLAP, ['Accept' => 'application/json'], $request);
-		$result = json_decode($response->body);
-		if (! $result->status) return  [FALSE, ['message' => $result->message]];
-
-		$request->method = 'market.token_inject';
-		$response = Requests::post(API_MARKET, ['Accept' => 'application/json'], $request);
-		$result = json_decode($response->body);
-		if (! $result->status) return  [FALSE, ['message' => $result->message]];
-
-		$request->method = 'master.token_inject';
-		$response = Requests::post(API_MASTER, ['Accept' => 'application/json'], $request);
-		$result = json_decode($response->body);
-		if (! $result->status) return  [FALSE, ['message' => $result->message]];
-
-		return [TRUE, ['message' => 'Success']];
 	}
 
 }
