@@ -51,7 +51,7 @@ class Auth_model extends CI_Model
 		list($success, $return) = $this->f->is_valid_appcode($request);
 		if (!$success) return [FALSE, $return];
 
-		list($success, $return) = $this->f->check_field_required($request, ['username','password']);
+		list($success, $return) = $this->f->check_param_required($request, ['username','password']);
 		if (!$success) return [FALSE, $return];
 
 		$row = $this->db->get_where($this->table_user, ['username' => $request->params->username])->row();
@@ -80,19 +80,19 @@ class Auth_model extends CI_Model
 		$token_expired = date('Y-m-d\TH:i:s\Z', time() + $this->login_token_expiration);
 		// Invalidate old session
 		$this->db->delete($this->table_session, [
-				'login_id' => $row->login_id, 'application_id' => $request->application_id, 'agent' => $request->agent, 'token <>' => $token
+			'client_id' => $row->client_id, 'login_id' => $row->login_id, 'application_id' => $request->application_id, 'agent' => $request->agent, 'token <>' => $token
 			]
 		);
 		
 		$this->db->insert($this->table_session, [
-				'login_id' => $row->login_id, 'application_id' => $request->application_id, 'agent' => $request->agent, 
+				'client_id' => $row->client_id, 'login_id' => $row->login_id, 'application_id' => $request->application_id, 'agent' => $request->agent, 
 				'token' => $token, 'token_expired' => $token_expired, 'created_at' => date('Y-m-d H:i:s')
 			]
 		);
 		
 		$this->db->update($this->table_user, 
 			['login_last' => date('Y-m-d H:i:s'), 'login_try' => 0], 
-			['username' => $request->params->username] 
+			['client_id' => $row->client_id, 'username' => $request->params->username] 
 		);
 		
 		$result = (object)[];
@@ -117,7 +117,7 @@ class Auth_model extends CI_Model
 		list($success, $return) = $this->f->is_valid_token($request);
 		if (!$success) return [FALSE, $return];
 		
-		list($success, $return) = $this->f->check_field_required($request, ['username', 'password', 'new_password']);
+		list($success, $return) = $this->f->check_param_required($request, ['username', 'password', 'new_password']);
 		if (!$success) return [FALSE, $return];
 		
 		$row = $this->db->get_where($this->table_user, ['username' => $request->params->username])->row();
@@ -160,7 +160,7 @@ class Auth_model extends CI_Model
 		list($success, $return) = $this->f->is_valid_appcode($request);
 		if (!$success) return [FALSE, $return];
 		
-		list($success, $return) = $this->f->check_field_required($request, ['email']);
+		list($success, $return) = $this->f->check_param_required($request, ['email']);
 		if (!$success) return [FALSE, $return];
 		
 		$row = $this->db->get_where('c_partner', ['email' => $request->params->email])->row();
@@ -190,7 +190,7 @@ class Auth_model extends CI_Model
 		list($success, $return) = $this->f->is_valid_token($request);
 		if (!$success) return [FALSE, $return];
 		
-		list($success, $return) = $this->f->check_field_required($request, ['login_id']);
+		list($success, $return) = $this->f->check_param_required($request, ['login_id']);
 		if (!$success) return [FALSE, $return];
 		
 		$row = $this->db->get_where($this->table_user, ['login_id' => $request->params->login_id])->row();

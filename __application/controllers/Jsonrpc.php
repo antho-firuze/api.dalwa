@@ -184,7 +184,7 @@ class Jsonrpc extends CI_Controller
 	private function is_valid_agent($request)
 	{
 		if (!isset($request->agent))
-			return [FALSE, ['message' => $this->f->_err_msg('err_param_requiredc', 'agent')]];	
+			return [FALSE, ['message' => $this->f->_err_msg('err_param_required', 'agent')]];	
 
 		if (empty($request->agent))
 			return [FALSE, ['message' => $this->f->_err_msg('err_param_unsupported', '{agent: null}')]];	

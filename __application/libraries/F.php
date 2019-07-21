@@ -128,6 +128,8 @@ class F {
 			$bind_count = count($binds);
 		}
 
+		$sql = preg_replace('/\s+/', ' ', trim($sql)); // Replaces all new line with space
+
 		// We'll need the marker length later
 		$ml = strlen($bind_marker);
 
@@ -204,6 +206,9 @@ class F {
 		if (!$row) 
 			return [FALSE, ['message' => F::_err_msg('err_appcode_invalid')]];
 
+		if ($row->agent != $request->agent) 
+			return [FALSE, ['message' => F::_err_msg('err_appcode_agent_invalid')]];
+
 		$request->application_id = $row->application_id;
 		return [TRUE, NULL];
 	}
@@ -214,12 +219,13 @@ class F {
 			return [FALSE, ['message' => F::_err_msg('err_token_invalid')]];
 
 		$ci =& get_instance();
-		$ci->db->select('a.application_id, a.agent, a.token_expired, b.partner_id, b.username, b.password, c.code as application_code');
+		$ci->db->select('a.application_id, a.agent, a.token_expired, b.partner_id, b.username, b.password, c.code as application_code, c.client_id');
 		$ci->db->from('a_session a');
 		$ci->db->join('a_login b', 'b.login_id = a.login_id');  
 		$ci->db->join('a_application c', 'c.application_id = a.application_id');  
 		$ci->db->where('a.token', $request->token);
 		$ci->db->where('a.agent', $request->agent);
+		$ci->db->where('c.code', $request->appcode);
 		$row = $ci->db->get()->row();
 		if (!$row) 
 			return [FALSE, ['message' => F::_err_msg('err_token_invalid')]];
@@ -229,6 +235,7 @@ class F {
 		
 		$request->application_id = $row->application_id;
 		$request->application_code = $row->application_code;
+		$request->client_id = $row->client_id;
 		$request->partner_id = $row->partner_id;
 
 		return [TRUE, NULL];
@@ -264,6 +271,17 @@ class F {
 	}
 	
 	function check_field_required($request, $fields = array())
+	{
+		foreach($fields as $k => $v)
+		{
+			if (!isset($request->{$v}) || empty($request->{$v}))
+				return [FALSE, ['message' => F::_err_msg('err_field_required', $v)]];
+		}
+
+		return [TRUE, NULL];
+	}
+
+	function check_param_required($request, $fields = array())
 	{
 		foreach($fields as $k => $v)
 		{
@@ -630,6 +648,109 @@ class F {
 		}
 			
 		return [TRUE, ['cache' => false, 'result' => $result]];
+	}
+	
+	function get_result_($request = NULL, $counter = FALSE)
+	{
+		$ci = &get_instance();
+
+		if (isset($request->params->order) && !empty($request->params->order)) {
+			$array = explode(",", $request->params->order);
+			if (!empty($array)) {
+				foreach ($array as $value) {
+					$ci->db->order_by($value);
+				}
+			}
+		}
+
+		/* sample: &filter=field1=value1,field2=value2... */
+		if (isset($request->params->filter) && !empty($request->params->filter)) {
+			$array = explode(",", $request->params->filter);
+			if (!empty($array)) {
+				foreach ($array as $value) {
+					// list($k, $v) = explode("=", $value);
+					// $ci->db->where($k, empty($v)?0:$v);
+					$ci->db->where($value, NULL, FALSE);
+				}
+			}
+		}
+
+		/* sample: &like=field1=value1,field2=value2... */
+		if (isset($request->params->filter_like) && !empty($request->params->filter_like)) {
+			$array = explode(",", $request->params->filter_like);
+			if (!empty($array)) {
+				foreach ($array as $value) {
+					list($k, $v) = explode("=", $value);
+					$ci->db->like($k, empty($v)?'':$v);
+					// $ci->db->where($value, NULL, FALSE);
+				}
+			}
+		}
+
+		/* SQL Filter
+		 * sample: &sfilter=is_import='1' and name like '%anonym%' */
+		if (isset($request->params->sfilter) && !empty($request->params->sfilter)) {
+			$ci->db->where($request->params->sfilter, NULL, FALSE);
+		}
+
+		/* For counting record number */
+		if ($counter) {
+			if (! $query = $ci->db->query($request))
+				return FALSE;
+
+			return ($query->num_rows() > 0) ? $query->num_rows() : 0;
+		}
+
+		$query_before_limit = $ci->db->get_compiled_select('', FALSE);
+		// die($query_before_limit);
+
+		// LIMITATION FOR JQUERY DATATABLES COMPONENT & JQUERY JEASYUI COMPONENT
+		/* sample: &limit=1&offset=0 */
+		if (! isset($request->params->limit) && empty($request->params->limit))
+			$request->params->limit = 10;
+
+		if (! isset($request->params->length) && empty($request->params->length))
+			$request->params->limit = 10;
+		else
+			$request->params->limit = $request->params->length;
+
+		if (! isset($request->params->rows) && empty($request->params->rows))
+			$request->params->limit = 10;
+		else
+			$request->params->limit = $request->params->rows;
+
+		if (! isset($request->params->offset) && empty($request->params->offset))
+			$request->params->offset = 0;
+	
+		if (! isset($request->params->start) && empty($request->params->start))
+			$request->params->offset = 0;
+		else
+			$request->params->offset = $request->params->start;
+
+		if (! isset($request->params->page) && empty($request->params->page))
+			$request->params->offset = 0;
+		else
+			$request->params->offset = ($request->params->page - 1) * $request->params->limit;
+
+		$ci->db->limit($request->params->limit, $request->params->offset);
+
+		$query_after_limit = $ci->db->get_compiled_select('', FALSE);
+		
+		if (! $query = $ci->db->get() ) {
+			return [FALSE, ['message' => $ci->db->error()['message']]];
+		} 
+		$result = $query->result();
+
+		// die($ci->db->last_query());
+		// echo F::get_result_($query_before_limit, TRUE);
+		// die();
+		
+		$response['page'] = $request->params->offset + 1;
+		$response['limit'] = $request->params->limit;
+		$response['total'] = F::get_result_($query_before_limit, TRUE);
+		$response['rows']  = $result;
+
+		return [TRUE, ['cache' => false, 'result' => $response]];
 	}
 	
 	function get_result_paging($request)

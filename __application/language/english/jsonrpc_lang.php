@@ -8,10 +8,12 @@ $lang['err_request_method_unsupported'] = 'Request method unsupported';
 $lang['err_request_invalid'] = 'Invalid request'; 
 $lang['err_licensekey_invalid'] = 'Invalid License Key';
 $lang['err_appcode_invalid'] = 'Invalid Application Code';
+$lang['err_appcode_agent_invalid'] = 'Invalid Application Code & Agent';
 $lang['err_token_invalid'] = 'Session invalid, please login again'; 
 $lang['err_token_expired'] = 'Session expired, please login again'; 
 $lang['err_method_unauthorized'] = 'You not authorized to call this method'; 
 
+$lang['err_field_required'] = 'Required field(s): [%s]'; 
 $lang['err_param_required'] = 'Required parameter: [%s]'; 
 $lang['err_param_unsupported'] = 'Unsupported parameter: [%s]'; 
 $lang['err_method_unknown'] = 'Unknown method: [%s]';
