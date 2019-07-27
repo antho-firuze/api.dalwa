@@ -33,58 +33,41 @@ $lang['success_login'] = 'Login Success';
 $lang['success_unlocked'] = 'This account has been unlocked'; 
 $lang['success_reset'] = 'Your password has been reset'; 
 $lang['success_chg_password'] = 'Your password has been changed'; 
-$lang['success_register'] = 'Your registration done, please check your email to validate your account'; 
+$lang['success_register'] = 'Your registration done, please check your email'; 
 $lang['success_activation'] = 'Thank you, your account has been active.<br>Now you can login in our Web/Android/IOS Apps !'; 
 
 $lang['info_sent_email_password'] = 'Your password has been sent to your email'; 
 $lang['info_sent_email_reset_password_link'] = 'Link address for reset password has been sent to your email'; 
 $lang['info_sent_email_rst_password'] = 'Password has been reset successfully, & new password has been sent to user email'; 
+$lang['info_copyright'] = 'Copyright by %s'; 
+$lang['info_poweredby'] = 'Powered by %s'; 
 
-$lang['email_subject_forgot_password_simple'] = 'Your New Password @{AppsName} !';
-$lang['email_body_forgot_password_simple'] = 'Dear {name}, <br><br>'.
-		'Your password has been reset. <br><br>'.
-		'This is your new password <b>{new_password}</b><br><br><br>'.
-		'You can change it after you login.<br><br>'.
-		'This email was sent by: <b>{simpiName}</b>,<br>'.
-		'{powered_by}';
-		
-$lang['email_subject_forgot_password'] = 'Forgot your Password?';
-$lang['email_body_forgot_password'] = 'Dear {name}, <br><br>'.
-		'You can reset your password by clicking link address below. <br><br>'.
-		'{domain_frontend}frontend/x_auth?mode=activation&agent=android&token={token}<br><br><br>'.
-		'Warning: This link is valid about 1 hour, start from your received this email, and can be use only one time.<br><br>'.
-		'This email was sent by: <b>{simpiName}</b>,<br>'.
-		'{powered_by}';
-		
-$lang['email_subject_reset_password'] = 'Your Password has been RESET !';
-$lang['email_body_reset_password'] = 'Dear {name}, <br><br>'.
-		'Your password has been RESET. <br><br>'.
-		'Your new password is <b>{new_password}</b><br><br><br>'.
-		'This email was sent by: <b>{simpiName}</b>,<br>'.
-		'{powered_by}';
-
-$lang['email_subject_rst_password'] = 'Your Password has been RESET by Admin !';
-$lang['email_body_rst_password'] = 'Dear {name}, <br><br>'.
-		'Your password has been RESET by Admin. <br><br>'.
-		'Your new password is <b>{new_password}</b><br><br><br>'.
-		'This email was sent by: <b>{simpiName}</b>,<br>'.
-		'{powered_by}';
-
-$lang['email_subject_chg_password'] = 'Your Password has been CHANGED !';
-$lang['email_body_chg_password'] = 'Dear {name}, <br><br>'.
-		'Your password has been CHANGED. <br><br>'.
-		'Your new password is <b>{new_password}</b><br><br><br>'.
-		'This email was sent by: <b>{simpiName}</b>,<br>'.
-		'{powered_by}';
-
-$lang['email_subject_register'] = 'Your Account REGISTRATION @{AppsName} !';
+$lang['email_subject_register'] = '{app_name} - ACCOUNT REGISTRATION !';
 $lang['email_body_register'] = 'Dear {name}, <br><br>'.
 		'Your registration has been completed. <br><br>'.
-		'This is your login email & password: <br><br>'.
-		'Email : <b>{email}</b><br>'.
-		'Password : <b>{new_password}</b><br><br>'.
-		'You can activate by login into it.<br><br>'.
-		'This email was sent by: <b>{simpiName}</b>,<br>'.
+		'This is your login account: <br><br>'.
+		'Username/Email : <b>{email}</b><br>'.
+		'Password : <b>{password}</b><br><br>'.
+		'You can change your password after you login.<br>'.
+		"Thank you for being a part of PP Darullughah Wadda'wah.<br><br>".
+		"Wassalam.<br><br><br>".
+		'This email was sent by: <b>{app_name}</b>,<br>'.
 		'{powered_by}';
 
+$lang['email_subject_forgot_password'] = '{app_name} - FORGOT PASSWORD !';
+$lang['email_body_forgot_password'] = 'Dear {name}, <br><br>'.
+		'Your password has been reset. <br><br>'.
+		'This is your new password: <b>{password}</b><br><br><br>'.
+		'You can change your password after you login.<br><br>'.
+		"Wassalam.<br><br><br>".
+		'This email was sent by: <b>{app_name}</b>,<br>'.
+		'{powered_by}';
 		
+$lang['email_subject_chg_password'] = '{app_name} - CHANGE PASSWORD !';
+$lang['email_body_chg_password'] = 'Dear {name}, <br><br>'.
+		'Your password has been CHANGED. <br><br>'.
+		'Your new password is: <b>{password}</b><br><br><br>'.
+		"Wassalam.<br><br><br>".
+		'This email was sent by: <b>{app_name}</b>,<br>'.
+		'{powered_by}';
+

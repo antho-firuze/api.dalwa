@@ -21,7 +21,7 @@ if (strpos($http_host, ':') > -1)
 	list($http_host, $http_port) = explode(':', $http_host);
 
 /* List available domain */
-$domain_devel = ['localhost','127.0.0.1','192.168.1.15','192.168.100.105'];
+$domain_devel = ['localhost','127.0.0.1','192.168.1.33','192.168.100.105'];
 $domain_live = [
 	'simpipro.com',
 	'api.simpipro.com',
@@ -59,6 +59,8 @@ if (function_exists('ini_set')) {
 	@ini_set('upload_max_filesize', '2M');
 	@ini_set('display_errors', IS_LOCAL ? on : off);					// on | off
 	@ini_set('error_reporting', IS_LOCAL ? E_ALL : 0);					// 0 | E_ALL | E_ERROR | E_WARNING | E_PARSE | E_NOTICE
+	// @ini_set('display_errors', off);					// on | off
+	// @ini_set('error_reporting', 0);					// 0 | E_ALL | E_ERROR | E_WARNING | E_PARSE | E_NOTICE
 }
 
 /* Define default path. Implement on $route['default_controller'] */
@@ -68,9 +70,14 @@ $path_localhost = [
 ];
 $path = [
 	'localhost' 				=> $path_localhost[$http_port],
+	'127.0.0.1' 				=> $path_localhost[$http_port],
+	'192.168.1.33' 			=> $path_localhost[$http_port],
 	'simpipro.com' 				=> 'frontend',
 	'api.simpipro.com' 			=> 'jsonrpc',
 ];
+if (! isset($path[$http_host]))
+	$f->bare_response(FALSE, ['message' => "Domain name <strong>$http_host</strong> :: Default PATH is not defined !"]);
+
 define('PATH', $path[$http_host]);
 
 // if (in_array($http_host, $domain_live)) {
@@ -89,9 +96,14 @@ $prefix_localhost = [
 ];
 $prefix = [
 	'localhost' 				=> $prefix_localhost[$http_port],
+	'127.0.0.1' 				=> $prefix_localhost[$http_port],
+	'192.168.1.33' 			=> $prefix_localhost[$http_port],
 	'api.simpipro.com' 			=> 'wl-api',
 	'system-api.simpipro.com' 	=> 'system-api',
 ];
+if (! isset($prefix[$http_host]))
+	$f->bare_response(FALSE, ['message' => "Domain name <strong>$http_host</strong> :: Prefix folder is not defined !"]);
+
 define('PREFIX_FOLDER', $prefix[$http_host]);
 
 // Database Name Config
@@ -110,9 +122,14 @@ $database_localhost = [
 ]; */
 $database = [
 	'localhost' 				=> $database_localhost[$http_port],
+	'127.0.0.1' 				=> $database_localhost[$http_port],
+	'192.168.1.33' 			=> $database_localhost[$http_port],
 	'api.simpipro.com' 			=> '',
 	'system-api.simpipro.com' 	=> 'simpi',
 ];
+if (! isset($database[$http_host]))
+	$f->bare_response(FALSE, ['message' => "Domain name <strong>$http_host</strong> :: Database is not defined !"]);
+
 define('DATABASE_NAME', $database[$http_host]);
 
 define('API_GATEWAY',   IS_LOCAL ? 'http://localhost:5051' : 'https://gateway-api.simpipro.com');

@@ -202,42 +202,45 @@ class F {
 		$ci->db->select('*');
 		$ci->db->from('a_application');
 		$ci->db->where('code', $request->appcode);
-		$row = $ci->db->get()->row();
-		if (!$row) 
+		if (! $result = $ci->db->get())
+			return [FALSE, ['message' => 'Database Error: '.$ci->db->error()['message']]];		
+
+		if (! $row = $result->row()) 
 			return [FALSE, ['message' => F::_err_msg('err_appcode_invalid')]];
 
 		if ($row->agent != $request->agent) 
 			return [FALSE, ['message' => F::_err_msg('err_appcode_agent_invalid')]];
 
-		$request->application_id = $row->application_id;
+		$request->client_id = $row->client_id;
+		$request->app_id = $row->app_id;
+		$request->app_name = $row->name;
 		return [TRUE, NULL];
 	}
 
 	function is_valid_token($request)
 	{
-		if (!isset($request->token) || empty($request->token)) 
-			return [FALSE, ['message' => F::_err_msg('err_token_invalid')]];
-
 		$ci =& get_instance();
-		$ci->db->select('a.application_id, a.agent, a.token_expired, b.partner_id, b.username, b.password, c.code as application_code, c.client_id');
+		$ci->db->select('a.app_id, a.agent, a.token_expired, b.client_id, b.login_id, b.username, b.password, c.code as app_code, c.name as app_name');
 		$ci->db->from('a_session a');
 		$ci->db->join('a_login b', 'b.login_id = a.login_id');  
-		$ci->db->join('a_application c', 'c.application_id = a.application_id');  
+		$ci->db->join('a_application c', 'c.app_id = a.app_id');  
 		$ci->db->where('a.token', $request->token);
 		$ci->db->where('a.agent', $request->agent);
 		$ci->db->where('c.code', $request->appcode);
-		$row = $ci->db->get()->row();
-		if (!$row) 
-			return [FALSE, ['message' => F::_err_msg('err_token_invalid')]];
+		if (! $result = $ci->db->get())
+			return [FALSE, ['message' => 'Database Error: '.$ci->db->error()['message']]];		
+
+		if (! $row = $result->row()) 
+			return [FALSE, ['message' => F::_err_msg('err_token_invalid'), 'need_login' => true]];
 		
 		if ($row->token_expired < date('Y-m-d H:i:s'))
-			return [FALSE, ['message' => F::_err_msg('err_token_invalid')]];
+			return [FALSE, ['message' => F::_err_msg('err_token_invalid'), 'need_login' => true]];
 		
-		$request->application_id = $row->application_id;
-		$request->application_code = $row->application_code;
+		$request->app_id = $row->app_id;
+		$request->app_code = $row->app_code;
+		$request->app_name = $row->app_name;
 		$request->client_id = $row->client_id;
-		$request->partner_id = $row->partner_id;
-
+		$request->login_id = $row->login_id;
 		return [TRUE, NULL];
 	}
 
@@ -468,28 +471,10 @@ class F {
 	function mail_queue($email = [])
 	{
 		$ci = &get_instance();
-		$ci->config->load('email', FALSE);
 		$email = is_array($email) ? (object)$email : $email; 
 
-		$config = [
-			'useragent'		=> 'CI Webservice',
-			'newline'		=> "\r\n",
-			'protocol'		=> 'smtp',
-			'smtp_host'		=> $ci->config->item('smtp_host'),
-			'smtp_port'		=> $ci->config->item('smtp_port'),
-			'smtp_user'		=> $ci->config->item('smtp_user'),
-			'smtp_pass'		=> $ci->config->item('smtp_pass'),
-			'smtp_timeout'	=> '7',
-			'charset'		=> 'iso-8859-1',
-			'mailtype'		=> 'html',
-			'priority'		=> '1',
-		];
-		
 		$email->is_test = IS_LOCAL ? '1' : '0';
-		$email->CreatedAt = date('Y-m-d H:i:s');
-		$email->_config = json_encode($config);
-		$email->_from = isset($email->_from) ? $email->_from : $ci->config->item('email_from');
-		if (!isset($email->_to)) return [FALSE, ['message' => F::_err_msg('err_email_to')]];
+		$email->created_at = date('Y-m-d H:i:s');
 		if (isset($email->_attachment)) {
 			if (is_array($email->_attachment))
 				$email->_attachment = json_encode($email->_attachment);
@@ -499,8 +484,8 @@ class F {
 				$email->_attachment = json_encode([$email->_attachment]);
 		}
 
-		if (!$result = $ci->db->insert('mobc_mail_queue', $email))
-			return [FALSE, ['message' => $ci->db->error()['message']]];
+		if (!$result = $ci->db->insert('mail_queue', $email))
+			return [FALSE, ['message' => 'Database Error: '.$ci->db->error()['message']]];
 		
 		return [TRUE, NULL];
 	}
@@ -618,7 +603,7 @@ class F {
 	{
 		$ci = &get_instance();
 		if (!$qry = $ci->db->get())
-			return [FALSE, ['message' => $ci->db->error()['message']]];
+			return [FALSE, ['message' => 'Database Error: '.$ci->db->error()['message']]];
 
 		if (!$row = $qry->row())
 			return [FALSE, ['message' => 'Record not found']];
@@ -632,7 +617,7 @@ class F {
 		
 		//exit($ci->db->get_compiled_select()); 
 		if (!$qry = $ci->db->get())
-			return [FALSE, ['message' => $ci->db->error()['message']]];
+			return [FALSE, ['message' => 'Database Error: '.$ci->db->error()['message']]];
 		
 		if (IS_LOCAL) {
 			$ci->load->helper('logger');
@@ -704,6 +689,10 @@ class F {
 		$query_before_limit = $ci->db->get_compiled_select('', FALSE);
 		// die($query_before_limit);
 
+		// for avoid error: "Creating default object from empty value"
+		if (! isset($request->params))
+			$request->params = (object)[];					
+
 		// LIMITATION FOR JQUERY DATATABLES COMPONENT & JQUERY JEASYUI COMPONENT
 		/* sample: &limit=1&offset=0 */
 		if (! isset($request->params->limit) && empty($request->params->limit))
@@ -737,7 +726,7 @@ class F {
 		$query_after_limit = $ci->db->get_compiled_select('', FALSE);
 		
 		if (! $query = $ci->db->get() ) {
-			return [FALSE, ['message' => $ci->db->error()['message']]];
+			return [FALSE, ['message' => 'Database Error: '.$ci->db->error()['message']]];
 		} 
 		$result = $query->result();
 
@@ -776,7 +765,7 @@ class F {
 		}
 		
 		if (!$qry = $ci->db->get())
-			return [FALSE, ['message' => $ci->db->error()['message']]];
+			return [FALSE, ['message' => 'Database Error: '.$ci->db->error()['message']]];
 		if (!$result = $qry->result())
 			return [FALSE, ['message' => 'Records not found']];	 
 
@@ -976,7 +965,7 @@ class F {
 		$ci->db->trans_complete();
 		if ($ci->db->trans_status() === FALSE)
 		{
-			if (IS_LOCAL)	logme('ERROR_QUERY', 'info', $ci->db->error()['message']);
+			if (IS_LOCAL)	logme('ERROR_QUERY', 'info', 'Database Error: '.$ci->db->error()['message']);
 			return [FALSE, ['message' => F::_err_msg('err_commit_data')]];
 		}
 
@@ -1006,7 +995,7 @@ class F {
 		$ci->db->trans_complete();
 		if ($ci->db->trans_status() === FALSE)
 		{
-			if (IS_LOCAL)	logme('ERROR_QUERY', 'info', $ci->db->error()['message']);
+			if (IS_LOCAL)	logme('ERROR_QUERY', 'info', 'Database Error: '.$ci->db->error()['message']);
 			return [FALSE, ['message' => F::_err_msg('err_commit_data')]];
 		}
 
@@ -1036,7 +1025,7 @@ class F {
 		$ci->db->trans_complete();
 		if ($ci->db->trans_status() === FALSE)
 		{
-			if (IS_LOCAL)	logme('ERROR_QUERY', 'info', $ci->db->error()['message']);
+			if (IS_LOCAL)	logme('ERROR_QUERY', 'info', 'Database Error: '.$ci->db->error()['message']);
 			return [FALSE, ['message' => F::_err_msg('err_commit_data')]];
 		}
 
