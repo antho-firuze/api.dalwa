@@ -266,7 +266,7 @@ class F {
 	function is_valid_token($request)
 	{
 		$ci =& get_instance();
-		$ci->db->select('a.app_id, a.agent, a.token_expired, b.client_id, b.login_id, b.username, b.password, c.code as app_code, c.name as app_name');
+		$ci->db->select('a.app_id, a.agent, a.token_expired, b.client_id, b.login_id, b.username, b.password, b.full_name, b.email, c.code as app_code, c.name as app_name');
 		$ci->db->from('a_session a');
 		$ci->db->join('a_login b', 'b.login_id = a.login_id');  
 		$ci->db->join('a_application c', 'c.app_id = a.app_id');  
@@ -287,6 +287,8 @@ class F {
 		$request->app_name = $row->app_name;
 		$request->client_id = $row->client_id;
 		$request->login_id = $row->login_id;
+		$request->full_name = $row->full_name;
+		$request->email = $row->email;
 		return [TRUE, NULL];
 	}
 

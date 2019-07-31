@@ -96,6 +96,9 @@ class Payment_model extends CI_Model
 				'desc' => $value->desc,
 				'amount' => $value->amount,
 			]);
+
+			// Update billing status became PENDING
+			$this->db->update('bill', ['bill_status_id' => 2], ['bill_id' => $value->bill_id]);
 		}
 
 		$this->db->trans_complete();
@@ -105,6 +108,23 @@ class Payment_model extends CI_Model
 			// return [FALSE, ['message' => $this->db->last_query()]];
 			return [FALSE, ['message' => $this->db->error()['message']]];
 		}
+
+		$email = [
+			'sender_id' => $this->sender_id,
+			'_to' 			=> $request->email,
+			'_subject' 	=> $this->f->lang('email_subject_confirmation', ['app_name' => $request->app_name]),
+			'_body'			=> $this->f->lang('email_body_confirmation', [
+				'name' 					=> $request->full_name, 
+				'payment_no' 		=> $request->params->payment_no, 
+				'grand_total' 	=> $request->params->grand_total,
+				'account_no' 		=> $request->params->account_no,
+				'app_name' 			=> $request->app_name,
+				'powered_by' 		=> 'Powered by DALWA @2019',
+				]),
+		];
+		list($success, $message) = $this->f->mail_queue($email);
+		if (!$success) return [FALSE, $message];
+
 		return [TRUE, ['result' => ['account_no' => $request->params->account_no]]];
 	}
 
