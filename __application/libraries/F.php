@@ -184,6 +184,52 @@ class F {
 	}
 
 	/*
+	 * Generate sequential formatted document number
+	 * 
+	 */
+	function gen_doc_no($request, $table)
+	{
+		$ci =& get_instance();
+
+		if (!isset($table) || empty($table))
+			return [FALSE, ['message' => F::_err_msg('err_param_required', 'table')]];
+
+		if (!$result = $ci->db->get_where('a_sequence', ['client_id' => $request->client_id, 'table' => $table]))
+			return [FALSE, ['message' => 'Database Error: '.$ci->db->error()['message']]];
+
+		if (!$row = $result->row()) 
+			return [FALSE, ['message' => F::_err_msg('err_payment_no_invalid')]];
+
+		$y = date("Y", strtotime(date('Y-m-d H:i:s')));
+		$m = date("m", strtotime(date('Y-m-d H:i:s')));
+
+		if (!$result = $ci->db->get_where('a_sequence_dt', ['seq_id' => $row->seq_id, 'year' => $y]))
+			return [FALSE, ['message' => 'Database Error: '.$ci->db->error()['message']]];		
+
+		if (!$row2 = $result->row()) {
+			if ($row->startnewyear == 'Y') {
+				$new_no = $row->start_no;
+			} else {
+				$new_no = $row->last_no + 1;
+			}
+			$num = str_pad($new_no, $row->digit_no, '0', STR_PAD_LEFT);
+			$request->params->payment_no = $row->prefix.$y.$m.$num.$row->suffix;
+
+			$ci->db->insert('a_sequence_dt', ['seq_id' => $row->seq_id, 'year' => $y, 'last_no' => $new_no]);
+		} else {
+			$new_no = $row2->last_no + 1;
+			$num = str_pad($new_no, $row->digit_no, '0', STR_PAD_LEFT);
+			$request->params->payment_no = $row->prefix.$y.$m.$num.$row->suffix;
+
+			$ci->db->update('a_sequence_dt', ['last_no' => $new_no], ['seq_dt_id' => $row2->seq_dt_id]);
+		}
+
+		$ci->db->update('a_sequence', ['last_no' => $new_no], ['seq_id' => $row->seq_id]);
+			
+		return [TRUE, NULL];
+	}
+
+	/*
 	 * Simple random password generator with length limit
 	 * 
 	 */

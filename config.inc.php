@@ -21,7 +21,7 @@ if (strpos($http_host, ':') > -1)
 	list($http_host, $http_port) = explode(':', $http_host);
 
 /* List available domain */
-$domain_devel = ['localhost','127.0.0.1','192.168.1.33','192.168.100.105'];
+$domain_devel = ['localhost','127.0.0.1','192.168.1.33','192.168.43.72','192.168.100.105'];
 $domain_live = [
 	'simpipro.com',
 	'api.simpipro.com',
@@ -72,6 +72,7 @@ $path = [
 	'localhost' 				=> $path_localhost[$http_port],
 	'127.0.0.1' 				=> $path_localhost[$http_port],
 	'192.168.1.33' 			=> $path_localhost[$http_port],
+	'192.168.43.72' 		=> $path_localhost[$http_port],
 	'simpipro.com' 				=> 'frontend',
 	'api.simpipro.com' 			=> 'jsonrpc',
 ];
@@ -98,6 +99,7 @@ $prefix = [
 	'localhost' 				=> $prefix_localhost[$http_port],
 	'127.0.0.1' 				=> $prefix_localhost[$http_port],
 	'192.168.1.33' 			=> $prefix_localhost[$http_port],
+	'192.168.43.72' 		=> $prefix_localhost[$http_port],
 	'api.simpipro.com' 			=> 'wl-api',
 	'system-api.simpipro.com' 	=> 'system-api',
 ];
@@ -124,6 +126,7 @@ $database = [
 	'localhost' 				=> $database_localhost[$http_port],
 	'127.0.0.1' 				=> $database_localhost[$http_port],
 	'192.168.1.33' 			=> $database_localhost[$http_port],
+	'192.168.43.72' 		=> $database_localhost[$http_port],
 	'api.simpipro.com' 			=> '',
 	'system-api.simpipro.com' 	=> 'simpi',
 ];

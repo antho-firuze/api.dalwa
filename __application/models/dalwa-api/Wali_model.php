@@ -36,7 +36,7 @@ class Wali_model extends CI_Model
 			$this->db->select($request->params->fields);
 
 		$str = '(
-      select a.login_id, a.reg_no, TRIM(CONCAT(b.first_name, " ", IFNULL(b.last_name,""))) as full_name
+      select a.login_id, b.partner_id, a.reg_no, TRIM(CONCAT(b.first_name, " ", IFNULL(b.last_name,""))) as full_name
 			from a_login_santri a
 			inner join c_partner b on a.reg_no = b.reg_no
       where a.client_id = ? and a.login_id = ?
