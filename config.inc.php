@@ -75,9 +75,8 @@ $path = [
 	'192.168.1.33' 			=> $path_localhost[$http_port],
 	'192.168.43.72' 		=> $path_localhost[$http_port],
 	'simpipro.com' 				=> 'frontend',
-	'api.simpipro.com' 		=> 'jsonrpc',
-	'api.kenziotech.com' 	=> 'jsonrpc',
-	'api.kenziotech.com' 	=> 'dalwa-api',
+	'api.simpipro.com' 			=> 'jsonrpc',
+	'api.kenziotech.com' 			=> 'jsonrpc',
 ];
 if (! isset($path[$http_host]))
 	$f->bare_response(FALSE, ['message' => "Domain name <strong>$http_host</strong> :: Default PATH is not defined !"]);
@@ -103,9 +102,9 @@ $prefix = [
 	'127.0.0.1' 				=> $prefix_localhost[$http_port],
 	'192.168.1.33' 			=> $prefix_localhost[$http_port],
 	'192.168.43.72' 		=> $prefix_localhost[$http_port],
-	'api.simpipro.com' 				=> 'wl-api',
-	'system-api.simpipro.com' => 'system-api',
-	'api.kenziotech.com' 			=> 'dalwa-api',
+	'api.simpipro.com' 			=> 'wl-api',
+	'system-api.simpipro.com' 	=> 'system-api',
+	'api.kenziotech.com' 		=> 'dalwa-api',
 ];
 if (! isset($prefix[$http_host]))
 	$f->bare_response(FALSE, ['message' => "Domain name <strong>$http_host</strong> :: Prefix folder is not defined !"]);
@@ -131,9 +130,9 @@ $database = [
 	'127.0.0.1' 				=> $database_localhost[$http_port],
 	'192.168.1.33' 			=> $database_localhost[$http_port],
 	'192.168.43.72' 		=> $database_localhost[$http_port],
-	'api.simpipro.com' 				=> '',
-	'system-api.simpipro.com' => 'simpi',
-	'api.kenziotech.com' 			=> 'db_dalwa',
+	'api.simpipro.com' 			=> '',
+	'system-api.simpipro.com' 	=> 'simpi',
+	'api.kenziotech.com' 		=> 'db_dalwa',
 ];
 if (! isset($database[$http_host]))
 	$f->bare_response(FALSE, ['message' => "Domain name <strong>$http_host</strong> :: Database is not defined !"]);
