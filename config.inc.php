@@ -103,8 +103,9 @@ $prefix = [
 	'127.0.0.1' 				=> $prefix_localhost[$http_port],
 	'192.168.1.33' 			=> $prefix_localhost[$http_port],
 	'192.168.43.72' 		=> $prefix_localhost[$http_port],
-	'api.simpipro.com' 			=> 'wl-api',
-	'system-api.simpipro.com' 	=> 'system-api',
+	'api.simpipro.com' 				=> 'wl-api',
+	'system-api.simpipro.com' => 'system-api',
+	'api.kenziotech.com' 			=> 'dalwa-api',
 ];
 if (! isset($prefix[$http_host]))
 	$f->bare_response(FALSE, ['message' => "Domain name <strong>$http_host</strong> :: Prefix folder is not defined !"]);
