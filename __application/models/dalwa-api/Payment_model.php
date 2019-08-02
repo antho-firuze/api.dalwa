@@ -2,6 +2,7 @@
 
 class Payment_model extends CI_Model
 {
+	private $sender_id = 1;
 	
 	function __construct()
 	{

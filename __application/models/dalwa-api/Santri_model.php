@@ -46,7 +46,7 @@ class Santri_model extends CI_Model
 			from bill a
 			inner join bill_status b on a.bill_status_id = b.bill_status_id
 			inner join c_partner c on a.partner_id = c.partner_id
-      where a.client_id = ? and c.reg_no = ? 
+      where a.client_id = ? and c.reg_no = ? and a.bill_status_id = 1
 		) g0';
 		$table = $this->f->compile_qry($str, [$request->client_id, $request->params->nis]);
 		$this->db->from($table);
