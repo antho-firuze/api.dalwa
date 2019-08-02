@@ -25,6 +25,7 @@ $domain_devel = ['localhost','127.0.0.1','192.168.1.33','192.168.43.72','192.168
 $domain_live = [
 	'simpipro.com',
 	'api.simpipro.com',
+	'api.kenziotech.com',
 ];
 $domain = array_merge($domain_devel, $domain_live);
 if (!in_array($http_host, $domain))
@@ -74,7 +75,9 @@ $path = [
 	'192.168.1.33' 			=> $path_localhost[$http_port],
 	'192.168.43.72' 		=> $path_localhost[$http_port],
 	'simpipro.com' 				=> 'frontend',
-	'api.simpipro.com' 			=> 'jsonrpc',
+	'api.simpipro.com' 		=> 'jsonrpc',
+	'api.kenziotech.com' 	=> 'jsonrpc',
+	'api.kenziotech.com' 	=> 'dalwa-api',
 ];
 if (! isset($path[$http_host]))
 	$f->bare_response(FALSE, ['message' => "Domain name <strong>$http_host</strong> :: Default PATH is not defined !"]);
@@ -127,8 +130,9 @@ $database = [
 	'127.0.0.1' 				=> $database_localhost[$http_port],
 	'192.168.1.33' 			=> $database_localhost[$http_port],
 	'192.168.43.72' 		=> $database_localhost[$http_port],
-	'api.simpipro.com' 			=> '',
-	'system-api.simpipro.com' 	=> 'simpi',
+	'api.simpipro.com' 				=> '',
+	'system-api.simpipro.com' => 'simpi',
+	'api.kenziotech.com' 			=> 'db_dalwa',
 ];
 if (! isset($database[$http_host]))
 	$f->bare_response(FALSE, ['message' => "Domain name <strong>$http_host</strong> :: Database is not defined !"]);
