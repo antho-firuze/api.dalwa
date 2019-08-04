@@ -277,10 +277,10 @@ class F {
 			return [FALSE, ['message' => 'Database Error: '.$ci->db->error()['message']]];		
 
 		if (! $row = $result->row()) 
-			return [FALSE, ['message' => F::_err_msg('err_token_invalid'), 'need_login' => true]];
+			return [FALSE, ['message' => F::_err_msg('err_token_invalid'), 'need_login' => 'true']];
 		
 		if ($row->token_expired < date('Y-m-d H:i:s'))
-			return [FALSE, ['message' => F::_err_msg('err_token_invalid'), 'need_login' => true]];
+			return [FALSE, ['message' => F::_err_msg('err_token_invalid'), 'need_login' => 'true']];
 		
 		$request->app_id = $row->app_id;
 		$request->app_code = $row->app_code;
