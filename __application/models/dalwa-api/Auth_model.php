@@ -235,11 +235,11 @@ class Auth_model extends CI_Model
 		
 		$email = [
 			'sender_id' => $this->sender_id,
-			'_to' 			=> $request->params->email,
+			'_to' 			=> $request->email,
 			'_subject' 	=> $this->f->lang('email_subject_chg_password', ['app_name' => $request->app_name]),
 			'_body'			=> $this->f->lang('email_body_chg_password', [
-				'name' 					=> $request->params->full_name, 
-				'email' 				=> $request->params->email, 
+				'name' 					=> $request->full_name, 
+				'email' 				=> $request->email, 
 				'password' 			=> $new_password,
 				'powered_by' 		=> 'Powered by DALWA @2019',
 				'app_name' 			=> $request->app_name,
