@@ -17,7 +17,7 @@ $lang['err_min_password_length'] = 'Minimum password length is %s';
 $lang['err_max_password_length'] = 'Maximum password length is %s'; 
 $lang['err_login_attempt_reached'] = 'Maksimum kesalahan login sudah tercapai, akun anda akan terkunci sementara. Silahkan coba lagi nanti, setelah %s'; 
 $lang['err_login_failed'] = 'Email atau Password salah, silahkan coba kembali'; 
-$lang['err_unlocked_failed'] = 'Incorrect Password'; 
+$lang['err_unlocked_failed'] = 'Password anda salah'; 
 $lang['err_old_password'] = 'Password lama anda salah'; 
 $lang['err_email_not_found'] = 'Email belum terdaftar'; 
 $lang['err_username_not_found'] = 'UserName belum terdaftar'; 
@@ -31,12 +31,12 @@ $lang['err_activate_account_email_password'] = 'Email atau Password salah, silah
 
 $lang['success_login'] = 'Login Success'; 
 $lang['success_unlocked'] = 'This account has been unlocked'; 
-$lang['success_reset'] = 'Your password has been reset'; 
-$lang['success_chg_password'] = 'Your password has been changed'; 
+$lang['success_reset'] = 'Password anda telah berhasil di reset'; 
+$lang['success_chg_password'] = 'Password anda telah berhasil di rubah'; 
 $lang['success_register'] = 'Registrasi berhasil, silahkan cek email anda'; 
 $lang['success_activation'] = 'Thank you, your account has been active.<br>Now you can login in our Web/Android/IOS Apps !'; 
 
-$lang['info_sent_email_password'] = 'Your password has been sent to your email'; 
+$lang['info_sent_email_password'] = 'Password telah di kirim ke email anda'; 
 $lang['info_sent_email_reset_password_link'] = 'Link address for reset password has been sent to your email'; 
 $lang['info_sent_email_rst_password'] = 'Password has been reset successfully, & new password has been sent to user email'; 
 $lang['info_copyright'] = 'Copyright by %s'; 
