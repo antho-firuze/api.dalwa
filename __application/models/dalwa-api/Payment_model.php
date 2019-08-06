@@ -144,8 +144,6 @@ class Payment_model extends CI_Model
 
 	function _is_valid_billing($request)
 	{
-		
-
 		if (!is_array($request->params->bill_ids)) 
 			return [FALSE, ['message' => $this->f->_err_msg('err_invalid_array', 'bill_ids')]];
 
@@ -199,6 +197,9 @@ class Payment_model extends CI_Model
 		list($success, $return) = $this->f->is_valid_token($request);
 		if (!$success) return [FALSE, $return];
     
+		list($success, $return) = $this->f->check_param_required($request, ['partner_id']);
+		if (!$success) return [FALSE, $return];
+
 		if (isset($request->params->fields) && !empty($request->params->fields))
 			$this->db->select($request->params->fields);
 
@@ -212,7 +213,32 @@ class Payment_model extends CI_Model
       where a.client_id = ? and a.partner_id = ? and a.grand_total > 0 
 		) g0';
 		$table = $this->f->compile_qry($str, [$request->client_id, $request->params->partner_id]);
+		$this->db->order_by("created_at desc");
 		$this->db->from($table);
+		return $this->f->get_result_($request);
+  }
+
+  function history_detail($request)
+  {
+		list($success, $return) = $this->f->is_valid_token($request);
+		if (!$success) return [FALSE, $return];
+    
+		list($success, $return) = $this->f->check_param_required($request, ['payment_id']);
+		if (!$success) return [FALSE, $return];
+
+		if (isset($request->params->fields) && !empty($request->params->fields))
+			$this->db->select($request->params->fields);
+
+		$str = '(
+      select a.desc, amount
+			from payment_dt as a 
+			where client_id = ? and payment_id = ? 
+			union all
+			select (select charge_title from payment_setting where client_id = ?), admin_charge from payment where client_id = ? and payment_id = ?
+		) g0';
+		$table = $this->f->compile_qry($str, [$request->client_id, $request->params->payment_id, $request->client_id, $request->client_id, $request->params->payment_id]);
+		$this->db->from($table);
+		
 		return $this->f->get_result_($request);
   }
 
