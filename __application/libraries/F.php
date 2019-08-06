@@ -782,7 +782,7 @@ class F {
 		// echo F::get_result_($query_before_limit, TRUE);
 		// die();
 		
-		$response['page'] = $request->params->offset + 1;
+		$response['page'] = $request->params->offset / $request->params->limit + 1;
 		$response['limit'] = $request->params->limit;
 		$response['total'] = F::get_result_($query_before_limit, TRUE);
 		$response['rows']  = $result;

@@ -44,7 +44,7 @@ class Bill_model extends CI_Model
 			from bill as a 
       inner join c_partner as b on a.partner_id = b.partner_id 
       inner join bill_status as c on a.bill_status_id = c.bill_status_id 
-      where DATE_FORMAT(a.due_date,"%Y%m") <= DATE_FORMAT(now(),"%Y%m") and a.total > 0 and a.client_id = ? and b.parent_id = ? 
+      where a.client_id = ? and b.partner_id = ? and DATE_FORMAT(a.due_date,"%Y%m") <= DATE_FORMAT(now(),"%Y%m") and a.total > 0
 		) g0';
 		$table = $this->f->compile_qry($str, [$request->client_id, $request->partner_id]);
 		$this->db->from($table);
