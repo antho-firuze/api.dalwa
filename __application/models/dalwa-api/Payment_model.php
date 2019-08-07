@@ -238,7 +238,7 @@ class Payment_model extends CI_Model
 		) g0';
 		$table = $this->f->compile_qry($str, [$request->client_id, $request->params->payment_id, $request->client_id, $request->client_id, $request->params->payment_id]);
 		$this->db->from($table);
-		
+
 		return $this->f->get_result_($request);
   }
 
