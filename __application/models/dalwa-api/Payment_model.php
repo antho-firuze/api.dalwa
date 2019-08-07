@@ -197,22 +197,23 @@ class Payment_model extends CI_Model
 		list($success, $return) = $this->f->is_valid_token($request);
 		if (!$success) return [FALSE, $return];
     
-		list($success, $return) = $this->f->check_param_required($request, ['partner_id']);
+		list($success, $return) = $this->f->check_param_required($request, ['nis']);
 		if (!$success) return [FALSE, $return];
 
 		if (isset($request->params->fields) && !empty($request->params->fields))
 			$this->db->select($request->params->fields);
 
 		$str = '(
-      select a.payment_id, a.partner_id, a.payment_method_id, a.payment_status_id, a.account_no, payment_no, sub_total, admin_charge, grand_total, created_at, payed_at, 
-      d.code as bank_code, c.desc as payment_status_desc
+      select a.payment_id, a.partner_id, a.payment_method_id, a.payment_status_id, a.account_no, payment_no, sub_total, admin_charge, grand_total, a.created_at, payed_at, 
+      e.code as bank_code, d.desc as payment_status_desc
 			from payment as a 
-      inner join payment_method as b on a.payment_method_id = b.payment_method_id 
-      inner join payment_status as c on a.payment_status_id = c.payment_status_id 
-      left outer join c_bank as d on b.bank_id = d.bank_id 
-      where a.client_id = ? and a.partner_id = ? and a.grand_total > 0 
+			inner join c_partner b on a.partner_id = b.partner_id
+      inner join payment_method as c on a.payment_method_id = c.payment_method_id 
+      inner join payment_status as d on a.payment_status_id = d.payment_status_id 
+      left outer join c_bank as e on c.bank_id = e.bank_id 
+      where a.client_id = ? and b.reg_no = ? and a.grand_total > 0 
 		) g0';
-		$table = $this->f->compile_qry($str, [$request->client_id, $request->params->partner_id]);
+		$table = $this->f->compile_qry($str, [$request->client_id, $request->params->nis]);
 		$this->db->order_by("created_at desc");
 		$this->db->from($table);
 		return $this->f->get_result_($request);
