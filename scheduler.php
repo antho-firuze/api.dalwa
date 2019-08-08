@@ -36,7 +36,7 @@ $scheduler->call(function () {
 
 	$method = 'mail_service/mail_send';
 	passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
-})->at('* * * * *');
+})->output('call every second task')->at('* * * * *');
 
 /**
  *	Scheduler: Every hour “At minute 15.”
