@@ -29,16 +29,10 @@ $scheduler = new Scheduler();
  *
  */
 $scheduler->call(function () {
-	// $method = 'scheduler/mail_send';
-	// passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
-
 	$method = 'mail_service/mail_send';
 	passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
 
 	sleep(30);
-
-	// $method = 'scheduler/mail_send';
-	// passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
 
 	$method = 'mail_service/mail_send';
 	passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
@@ -82,10 +76,10 @@ $scheduler->call(function () {
 	// 		}
 	// 	}
 	// }
-	sleep(15);
+	// sleep(15);
 	
-	$method = 'scheduler/retrieve_log_api';
-	passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
+	// $method = 'scheduler/retrieve_log_api';
+	// passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
 })->at('* * * * *');
 
 /**
