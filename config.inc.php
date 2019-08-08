@@ -66,6 +66,7 @@ if (function_exists('ini_set')) {
 
 /* Define default path. Implement on $route['default_controller'] */
 $path_localhost = [
+	'' => 'jsonrpc',
 	5000 => 'frontend',
 	5050 => 'jsonrpc',
 ];

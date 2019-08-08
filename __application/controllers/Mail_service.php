@@ -10,7 +10,7 @@ class Mail_service extends CI_Controller
 {
 	function __construct(){
 		parent::__construct();
-		$this->load->database('simpi_gatewaydb');
+		$this->load->database(DATABASE_SYSTEM);
         $this->load->library('f');
         $this->load->helper('logger');
 	}
@@ -25,20 +25,23 @@ class Mail_service extends CI_Controller
     {
 		$upload_path = FCPATH.'__tmp'.DIRECTORY_SEPARATOR;
         $table = "(
-            select queueID, _to, _cc, _bcc, _subject, _body, _attachment, is_test, is_sent, trying, status, CreatedAt, LastTryAt, 
-            senderName, senderEmail, protocol, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_timeout, charset, mail_type, smtp_crypto 
+            select mail_id, _to, _cc, _bcc, _subject, _body, _attachment, is_test, is_sent, trying, status, created_at, last_try_at, 
+            name, email, protocol, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_crypto, smtp_timeout, charset, mail_type, newline 
             from mail_queue t1 
-            left outer join mail_setting_sender t2 on t1.senderID = t2.senderID 
+            left outer join mail_setting_sender t2 on t1.sender_id = t2.sender_id 
             where is_test = '0' and trying <= 3 and is_sent = '0' and status in ('waiting','failed') 
-            order by queueID limit 1
+            order by mail_id limit 1
             ) g0 ";
         $this->db->from($table);
-		if (! $row = $this->db->get()->row()) {
+		if (!$result = $this->db->get())
+            die('Database Error: '.$this->db->error()['message']);		
+            
+		if (!$row = $result->row()) {
             $this->logger(__FUNCTION__);
             die('No email queue');
         }
        
-        $this->db->update('mail_queue', ['status' => 'queuing'], ['queueID' => $row->queueID]);
+        $this->db->update('mail_queue', ['status' => 'queuing'], ['mail_id' => $row->mail_id]);
 
         //pathing attachment
         $attachment = NULL;
@@ -62,9 +65,10 @@ class Mail_service extends CI_Controller
                             'smtp_timeout' => $row->smtp_timeout, 
                             'charset' => $row->charset, 
                             'mailtype' => $row->mail_type, 
+                            'newline' => $row->newline, 
                         ],
-            'from'      => $row->senderEmail,
-            'from_name' => $row->senderName,
+            'from'      => $row->email,
+            'from_name' => $row->name,
             'to'        => $row->_to,
             'cc'        => $row->_cc,
             'bcc'       => $row->_bcc,
@@ -72,19 +76,19 @@ class Mail_service extends CI_Controller
             'body'      => $row->_body,
             'attachment' => $attachment,
         ];
-        die(var_dump($email));
+        // die(var_dump($email));
 
         $data = [
             'trying' => $row->trying + 1,
-            'LastTryAt' => date('Y-m-d H:i:s'),
+            'last_try_at' => date('Y-m-d H:i:s'),
         ];
         list($success, $return) = $this->f->mail_send($email);
         if (!$success) {
-            $data['LastErrorMsg'] = $return['message'];
+            $data['error_msg'] = $return['message'];
             $data['is_sent'] = '0';
             $data['status'] = 'failed';
         } else {
-            $data['LastErrorMsg'] = NULL;
+            $data['error_msg'] = NULL;
             $data['is_sent'] = '1';
             $data['status'] = 'success';
         }

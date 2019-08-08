@@ -460,8 +460,8 @@ class F {
 		
 		$config = [
 			'useragent'		=> isset($email->config->useragent) ? $email->config->useragent : $ci->config->item('useragent'),
-			'newline'		=> isset($email->config->newline) ? $email->config->newline : $ci->config->item('newline'),
-			'crlf'			=> isset($email->config->crlf) ? $email->config->crlf : $ci->config->item('crlf'),
+			'newline'			=> isset($email->config->newline) ? $email->config->newline : $ci->config->item('newline'),
+			'crlf'				=> isset($email->config->crlf) ? $email->config->crlf : $ci->config->item('crlf'),
 			'protocol'		=> isset($email->config->protocol) ? $email->config->protocol : $ci->config->item('protocol'),
 			'smtp_host'		=> isset($email->config->smtp_host) ? $email->config->smtp_host : $ci->config->item('smtp_host'),
 			'smtp_port'		=> isset($email->config->smtp_port) ? $email->config->smtp_port : $ci->config->item('smtp_port'),

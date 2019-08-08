@@ -4,11 +4,18 @@
 require_once __DIR__.'/vendor/autoload.php';
 
 define('DIR_TMP', '__tmp');
-define('PHP_BIN_LNX', '/opt/plesk/php/7.2/bin/php');
+//PLESK 
+//define('PHP_BIN_LNX', '/opt/plesk/php/7.2/bin/php');		
+//CPANEL   
+define('PHP_BIN_LNX', '/opt/cpanel/ea-php72/root/usr/bin/php');
+
 define('PHP_BIN_WIN', 'c:/nginx/php/php.exe');
 define('HTTP_HOST', isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'localhost');
 define('PHP_BIN', (PHP_OS === 'WINNT' ? PHP_BIN_WIN : PHP_BIN_LNX));
-define('PHP_INDEX', (PHP_OS === 'WINNT' ? 'c:\_repos\api.simpipro\index.php' : '/var/www/vhosts/simpipro.com/api.simpipro.com/index.php'));
+//PLESK
+// define('PHP_INDEX', (PHP_OS === 'WINNT' ? 'c:\_repos\api.simpipro\index.php' : '/var/www/vhosts/simpipro.com/api.simpipro.com/index.php'));
+//CPANEL
+define('PHP_INDEX', (PHP_OS === 'WINNT' ? 'c:\_repos\api.simpipro\index.php' : '/home/k9678790/api.dalwa/index.php'));
 
 use GO\Scheduler;
 
@@ -22,16 +29,16 @@ $scheduler = new Scheduler();
  *
  */
 $scheduler->call(function () {
-	$method = 'scheduler/mail_send';
-	passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
+	// $method = 'scheduler/mail_send';
+	// passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
 
 	$method = 'mail_service/mail_send';
 	passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
 
 	sleep(30);
 
-	$method = 'scheduler/mail_send';
-	passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
+	// $method = 'scheduler/mail_send';
+	// passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
 
 	$method = 'mail_service/mail_send';
 	passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
