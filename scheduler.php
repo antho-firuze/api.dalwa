@@ -30,12 +30,14 @@ $scheduler = new Scheduler();
  */
 $scheduler->call(function () {
 	$method = 'mail_service/mail_send';
-	passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
+	// passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
+	exec(PHP_BIN . ' ' . PHP_INDEX . ' ' . $method);
 
 	sleep(30);
 
 	$method = 'mail_service/mail_send';
-	passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
+	// passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
+	exec(PHP_BIN . ' ' . PHP_INDEX . ' ' . $method);
 })->output('call every second task')->at('* * * * *');
 
 /**
