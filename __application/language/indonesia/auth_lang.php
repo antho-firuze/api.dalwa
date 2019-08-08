@@ -36,7 +36,7 @@ $lang['success_chg_password'] = 'Password anda telah berhasil di rubah';
 $lang['success_register'] = 'Registrasi berhasil, silahkan cek email anda'; 
 $lang['success_activation'] = 'Thank you, your account has been active.<br>Now you can login in our Web/Android/IOS Apps !'; 
 
-$lang['info_sent_email_password'] = 'Password telah di kirim ke email anda'; 
+$lang['info_sent_email_password'] = 'Password baru telah di kirim ke email anda'; 
 $lang['info_sent_email_reset_password_link'] = 'Link address for reset password has been sent to your email'; 
 $lang['info_sent_email_rst_password'] = 'Password has been reset successfully, & new password has been sent to user email'; 
 $lang['info_copyright'] = 'Copyright by %s'; 
