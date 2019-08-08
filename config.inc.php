@@ -66,7 +66,7 @@ if (function_exists('ini_set')) {
 
 /* Define default path. Implement on $route['default_controller'] */
 $path_localhost = [
-	'' => 'jsonrpc',
+	'' => 'jsonrpc',				// for php cli execute. etc: mail_service
 	5000 => 'frontend',
 	5050 => 'jsonrpc',
 ];
@@ -95,6 +95,7 @@ define('API_URL', BASE_URL);
 
 // Prefix folder in application/model (for jsonrpc)
 $prefix_localhost = [
+	'' => 'dalwa-api',				// for php cli execute. etc: mail_service
 	5050 => 'dalwa-api',
 	5051 => 'gateway-api',
 ];
@@ -114,6 +115,7 @@ define('PREFIX_FOLDER', $prefix[$http_host]);
 
 // Database Name Config
 $database_localhost = [
+	'' => 'db_dalwa',				// for php cli execute. etc: mail_service
 	5050 => 'db_dalwa',
 	5051 => 'simpi_gateway',
 ];
