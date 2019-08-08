@@ -93,7 +93,7 @@ class Mail_service extends CI_Controller
             $data['status'] = 'success';
         }
 
-        $this->db->update('mail_queue', $data, ['queueID' => $row->queueID]);
+        $this->db->update('mail_queue', $data, ['mail_id' => $row->mail_id]);
         $this->logger(__FUNCTION__);
         die(($success ? 'success' : $return['message']));
     }
