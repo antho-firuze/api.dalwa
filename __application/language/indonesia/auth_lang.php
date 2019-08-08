@@ -64,7 +64,7 @@ $lang['email_body_forgot_password'] = 'Dear {name}, <br><br>'.
 		
 $lang['email_subject_chg_password'] = '{app_name} - PERUBAHAN PASSWORD !';
 $lang['email_body_chg_password'] = 'Dear {name}, <br><br>'.
-		'Perubahan Password anda telah berjalan sukses. <br><br>'.
+		'Perubahan Password anda telah berhasil. <br><br>'.
 		'Password baru anda adalah: <b>{password}</b><br><br>'.
 		"Wassalam.<br><br><br>".
 		'Email ini dikirim otomatis oleh: <b>{app_name}</b>,<br>'.

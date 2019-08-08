@@ -35,7 +35,7 @@ class Auth_model extends CI_Model
 		if ($this->max_password_length > 0) 
 		{
 			if (strlen($password) > $this->max_password_length)
-			return [FALSE, $this->f->_err_msg('err_max_password_length', $this->max_password_length)];
+				return [FALSE, $this->f->_err_msg('err_max_password_length', $this->max_password_length)];
 		}
 		
 		$password = md5($password);
@@ -68,11 +68,11 @@ class Auth_model extends CI_Model
 			return [FALSE, ['message' => $this->f->_err_msg('err_email_has_register')]];
 		
 		$new_password = $this->f->gen_pwd($this->min_password_length);
-		list($success, $message) = $this->is_valid_password($new_password);
+		list($success, $result) = $this->is_valid_password($new_password);
 		if (!$success)
-			return [FALSE, ['message' => $message]];
+			return [FALSE, ['message' => $result]];
 			
-		$new_password_enc = $message;
+		$new_password_enc = $result;
 		$result = $this->db->insert($this->table_user, [
 			'client_id' => $request->client_id, 
 			'full_name' => $request->params->full_name, 
