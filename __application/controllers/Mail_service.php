@@ -26,7 +26,7 @@ class Mail_service extends CI_Controller
 		$upload_path = FCPATH.'__tmp'.DIRECTORY_SEPARATOR;
         $table = "(
             select mail_id, _to, _cc, _bcc, _subject, _body, _attachment, is_test, is_sent, trying, status, created_at, last_try_at, 
-            name, email, protocol, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_crypto, smtp_timeout, charset, mail_type, newline 
+            name, email, protocol, smtp_host, smtp_port, smtp_user, smtp_pass, smtp_crypto, smtp_timeout, charset, mailtype, newline 
             from mail_queue t1 
             left outer join mail_setting_sender t2 on t1.sender_id = t2.sender_id 
             where is_test = '0' and trying <= 3 and is_sent = '0' and status in ('waiting','failed') 
@@ -64,7 +64,7 @@ class Mail_service extends CI_Controller
                             'smtp_crypto' => $row->smtp_crypto, 
                             'smtp_timeout' => $row->smtp_timeout, 
                             'charset' => $row->charset, 
-                            'mailtype' => $row->mail_type, 
+                            'mailtype' => $row->mailtype, 
                             'newline' => $row->newline, 
                         ],
             'from'      => $row->email,
