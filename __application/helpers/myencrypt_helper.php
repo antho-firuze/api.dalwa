@@ -155,7 +155,7 @@ if ( ! function_exists('UUIDv4'))
 	}
 }
 
-if ( ! function_exists('random_str'))
+if ( ! function_exists('random_str_old'))
 {
 	/**
 	 * Create a "Random" String
@@ -164,11 +164,37 @@ if ( ! function_exists('random_str'))
 	 * @param	string $type	Type of random string.  basic, alpha, alnum, numeric, nozero, unique, md5, encrypt and sha1
 	 * @return	string
 	 */
-    function random_str(int $len = 8, string $type = 'alnum')
+    function random_str_old(int $len = 8, string $type = 'alnum')
     {
         $ci = get_instance()->load->helper('string');
 
         return random_string($type, $len);
+    }
+}
+
+if ( ! function_exists('random_str'))
+{
+	/**
+	 * Create a "Random" String
+	 *
+	 * @param	int	$len        number of characters
+	 * @param	string $type	Type of random string.  uppercase|lowercase|numeric
+	 * @return	string
+	 */
+    function random_str(int $len = 8, string $type = 'numeric|uppercase')
+    {
+        $data = [
+            'numeric'   => '123456789',
+            'lowercase' => 'abcdefghijklmnopqrstuvwxyz',
+            'uppercase' => 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+        ];
+
+        $pool = '';
+        $types = explode('|', $type);
+        foreach($types as $v) 
+            $pool .= isset($data[$v]) ? $data[$v] : '';
+
+        return substr(str_shuffle(str_repeat($pool, ceil($len / strlen($pool)))), 0, $len);
     }
 }
 
