@@ -188,12 +188,13 @@ class Dalwa_service extends CI_Controller
         if (!isset($setting->expiration_time_sec))
             die('Field [expiration_time_sec] on Table Payment Setting is invalid');
 
-        $this->db->where('client_id', $client_id);
-        $this->db->where('payment_status_id', 1);
-        $this->db->where('payed_at', null);
-        $this->db->where('grand_total >', 0);
-        $this->db->where('UNIX_TIMESTAMP(created_at) + '.$setting->expiration_time_sec.' < UNIX_TIMESTAMP()', NULL, FALSE);
-        if (!$result = $this->db->get('payment'))
+		$str = '(
+            select * from payment
+            where client_id = ? and payment_status_id = 1 and payed_at is null and grand_total > 0 and UNIX_TIMESTAMP(created_at) + ? < ?
+		) g0';
+		$table = $this->f->compile_qry($str, [$client_id, $setting->expiration_time_sec, time()]);
+        $this->db->from($table);
+        if (!$result = $this->db->get())
             die('Database Error: '.$this->db->error()['message']);
 
         if(!$payments = $result->result())
@@ -210,11 +211,6 @@ class Dalwa_service extends CI_Controller
             if ($payment_dt = $result->row()) {
                 $str = $this->db->update_string('bill', ['bill_status_id' => 1], "bill_id in ($payment_dt->bill_ids)");
                 $this->db->query($str);
-                // print_r($str);
-                // die();
-                // $this->db->where_in('bill_id', explode(',', $payment_dt->bill_ids));
-                // $this->db->update('bill', ['bill_status_id' => 1]);
-                // $this->db->update_string('bill', ['bill_status_id' => 1], "bill_id in ($payment_dt->bill_ids)");
             }
 
             // Recall VIRTUAL ACCOUNT BILLS 
