@@ -197,8 +197,10 @@ class Dalwa_service extends CI_Controller
         if (!$result = $this->db->get())
             die('Database Error: '.$this->db->error()['message']);
 
-        if(!$payments = $result->result())
+        if(!$payments = $result->result()) {
+            print_r($this->db->error()['message']);
             die('No payment to be expired');
+        }
 
         foreach ($payments as $r) {
 
