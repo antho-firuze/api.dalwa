@@ -194,15 +194,20 @@ class Dalwa_service extends CI_Controller
 		) g0';
 		$table = $this->f->compile_qry($str, [$client_id, $setting->expiration_time_sec, time()]);
         $this->db->from($table);
+        
+        // $this->db->where('client_id', $client_id);
+        // $this->db->where('payment_status_id', 1);
+        // $this->db->where('payed_at', null);
+        // $this->db->where('grand_total >', 0);
+        // $this->db->where('UNIX_TIMESTAMP(created_at) + '.(integer) $setting->expiration_time_sec.' < '.time(), NULL, FALSE);
+        // $this->db->from('payment');
         if (!$result = $this->db->get())
             die('Database Error: '.$this->db->error()['message']);
 
-        if(!$payments = $result->result()) {
-            print_r(date('Y-m-d H:i:s'));
-            print_r(time());
-            print_r($this->db->last_query());
+        print_r($this->db->last_query());
+        die();
+        if(!$payments = $result->result())
             die('No payment to be expired');
-        }
 
         foreach ($payments as $r) {
 
