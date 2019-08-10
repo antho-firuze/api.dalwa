@@ -38,7 +38,31 @@ $scheduler->call(function () {
 	$method = 'mail_service/mail_send';
 	// passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
 	exec(PHP_BIN . ' ' . PHP_INDEX . ' ' . $method);
-})->output('call every second task')->at('* * * * *');
+})->at('* * * * *');
+
+/**
+ *	Scheduler: Every minute
+ *
+ */
+$scheduler->call(function () {
+	$method = 'dalwa_service/check_payment_expiration';
+	$params = '1';
+	// passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
+	exec(PHP_BIN . ' ' . PHP_INDEX . ' ' . $method. ' ' . $params);
+
+})->at('* * * * *');
+
+/**
+ *	Scheduler: Every hour service
+ *
+ */
+$scheduler->call(function () {
+	$method = 'dalwa_service/generate_bill';
+	$params = '1';
+	// passthru(PHP_BIN.' '.PHP_INDEX.' '.$method);
+	exec(PHP_BIN . ' ' . PHP_INDEX . ' ' . $method. ' ' . $params);
+
+})->at('0 * * * *');
 
 /**
  *	Scheduler: Every hour “At minute 15.”
