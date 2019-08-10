@@ -1,5 +1,9 @@
 <?php if (!defined('BASEPATH')) {exit('No direct script access allowed');}
 
+/* Time Zone */ 
+define('TIME_ZONE', 'Asia/Jakarta'); 
+@date_default_timezone_set(TIME_ZONE);
+
 /**
  * Dalwa Service Class
  *
