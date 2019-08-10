@@ -193,9 +193,10 @@ class Dalwa_service extends CI_Controller
 
 		$str = '(
             select * from payment
-            where client_id = ? and payment_status_id = 1 and payed_at is null and grand_total > 0 and UNIX_TIMESTAMP(created_at) + ? < ?
+            where client_id = ? and payment_status_id = 1 and payed_at is null and grand_total > 0 and 
+            FROM_UNIXTIME(UNIX_TIMESTAMP(created_at) + ?) < FROM_UNIXTIME(UNIX_TIMESTAMP(?))
 		) g0';
-		$table = $this->f->compile_qry($str, [$client_id, $setting->expiration_time_sec, time()]);
+		$table = $this->f->compile_qry($str, [$client_id, $setting->expiration_time_sec, date('Y-m-d H:i:s')]);
         $this->db->from($table);
         
         // $this->db->where('client_id', $client_id);
